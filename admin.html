@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#060609">
+<title>SIMBAH MOV — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+body{min-height:100vh;display:block;background:var(--bg)}
+.admin-page{min-height:100vh;padding:16px;display:flex;justify-content:center;align-items:flex-start}
+.adm-mask{position:static;display:flex;background:none;backdrop-filter:none;min-height:100vh;padding:0}
+.adm-box{max-width:560px;margin:0 auto;max-height:none;min-height:calc(100vh - 32px)}
+.admin-brand{font-family:'Bebas Neue',sans-serif;font-size:1.55rem;letter-spacing:4px;margin-bottom:16px}
+.admin-brand b{color:var(--red)}
+.manage-search{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.manage-search .ms{color:var(--txt3);font-size:20px}
+.manage-search input{margin:0}
+.manage-count{font-size:.6rem;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;margin:0 0 8px}
+.empty-search{text-align:center;padding:28px 10px;color:var(--txt3);font-size:.72rem;letter-spacing:1px}
+@media(max-width:480px){
+  .admin-page{padding:0}
+  .adm-box{border-left:0;border-right:0;width:100%;min-height:100vh}
+}
+</style>
+</head>
+<body>
+<div class="admin-page">
+  <div class="adm-mask">
+    <div class="adm-box" id="admPanel">
+      <div class="loader" id="admPanelLoader"><div class="spinner"></div></div>
+      <div class="admin-brand">SIMBAH<b>MOV</b> ADMIN</div>
+
+      <div class="adm-tabs">
+        <div class="adm-tab on" id="atUpload" onclick="switchAdmTab('upload')">Upload</div>
+        <div class="adm-tab" id="atSchedule" onclick="switchAdmTab('schedule')">Jadwal</div>
+        <div class="adm-tab" id="atManage" onclick="switchAdmTab('manage')">Kelola</div>
+        <div class="adm-tab" id="atInbox" onclick="switchAdmTab('inbox')" style="position:relative">Inbox<span id="inboxBadge" style="display:none;position:absolute;top:4px;right:2px;background:var(--red);color:#fff;font-size:.55rem;font-weight:700;padding:1px 4px"></span></div>
+      </div>
+
+      <div class="adm-sec on" id="aSecUpload">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;margin-bottom:14px" id="admFormTitle">Tambah Konten</div>
+        <input type="hidden" id="editKey">
+        <div class="csw">
+          <div class="cst" id="trigType" onclick="toggleDD('ddType')">Movie <span style="font-size:.6rem;color:var(--txt3)">▼</span></div>
+          <div class="cso" id="ddType">
+            <div class="cso-opt" onclick="selOpt('addType','movie','Movie','trigType','ddType')">Movie</div>
+            <div class="cso-opt" onclick="selOpt('addType','series','Serial','trigType','ddType')">Serial (Multi Season)</div>
+            <div class="cso-opt" onclick="selOpt('addType','livetv','Live TV','trigType','ddType')">Live TV</div>
+          </div>
+          <input type="hidden" id="addType" value="movie">
+        </div>
+        <input type="text" class="ai" id="addTitle" placeholder="Judul">
+        <input type="text" class="ai" id="addUploader" placeholder="Upload oleh">
+        <div style="display:flex;gap:8px">
+          <input type="text" class="ai" id="addLang" placeholder="Bahasa" style="flex:1">
+          <input type="text" class="ai" id="addRating" placeholder="Rating" style="width:70px">
+        </div>
+        <input type="text" class="ai" id="addPoster" placeholder="URL Poster">
+        <input type="text" class="ai" id="addTrailer" placeholder="URL Trailer YouTube (opsional)">
+        <textarea class="ai ai-ta" id="addSynopsis" placeholder="Sinopsis..."></textarea>
+        <div class="csw">
+          <div class="cst" id="trigCat" onclick="toggleDD('ddCat')">Animation <span style="font-size:.6rem;color:var(--txt3)">▼</span></div>
+          <div class="cso" id="ddCat">
+            <div class="cso-opt" onclick="selOpt('addCat','Live TV','Live TV','trigCat','ddCat')">Live TV</div>
+            <div class="cso-opt" onclick="selOpt('addCat','Film','Film Indonesia','trigCat','ddCat')">Film Indonesia</div>
+            <div class="cso-opt" onclick="selOpt('addCat','Film Luar','Film Luar','trigCat','ddCat')">Film Luar</div>
+            <div class="cso-opt" onclick="selOpt('addCat','Anime','Anime','trigCat','ddCat')">Anime</div>
+            <div class="cso-opt" onclick="selOpt('addCat','Kartun','Animation','trigCat','ddCat')">Animation</div>
+          </div>
+          <input type="hidden" id="addCat" value="Kartun">
+        </div>
+        <div class="genre-grid" id="uploadGenreGrid"></div>
+        <div id="fldMovie">
+          <input type="text" class="ai" id="addUrl" placeholder="Link Embed / ID YouTube / .m3u8">
+          <input type="text" class="ai" id="addDlUrl1080" placeholder="Link Download 1080p (opsional)">
+          <input type="text" class="ai" id="addDlUrl720" placeholder="Link Download 720p (opsional)">
+        </div>
+        <div id="fldSeries" style="display:none">
+          <div id="seasonCon"></div>
+          <button class="adm-act" style="background:var(--bg3);color:var(--txt2);border:1px solid var(--line2)" onclick="addSeason()">+ Tambah Season</button>
+        </div>
+        <div id="fldLive" style="display:none">
+          <input type="text" class="ai" id="addLiveUrl" placeholder="Link Stream .m3u8 / embed URL">
+          <input type="text" class="ai" id="addChLogo" placeholder="URL Logo Channel (opsional)">
+          <div style="display:flex;gap:8px">
+            <select class="ai ai-sel" id="addLiveQ" style="flex:1">
+              <option value="auto">Kualitas Auto</option><option value="HD">HD</option>
+              <option value="FHD">FHD 1080p</option><option value="SD">SD</option><option value="4K">4K</option>
+            </select>
+            <select class="ai ai-sel" id="addLiveSt" style="flex:1">
+              <option value="live">Sedang Live</option><option value="replay">Replay</option><option value="scheduled">Terjadwal</option>
+            </select>
+          </div>
+        </div>
+        <button class="adm-act" onclick="saveMovie()">Simpan</button>
+      </div>
+
+      <div class="adm-sec" id="aSecSchedule">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;margin-bottom:14px">Form Jadwal</div>
+        <input type="text" class="ai" id="schTitle" placeholder="Judul">
+        <input type="text" class="ai" id="schUploader" placeholder="Upload oleh">
+        <div style="display:flex;gap:8px">
+          <input type="text" class="ai" id="schLang" placeholder="Bahasa" style="flex:1">
+          <input type="text" class="ai" id="schRating" placeholder="Rating" style="width:70px">
+        </div>
+        <input type="text" class="ai" id="schPoster" placeholder="URL Poster">
+        <input type="text" class="ai" id="schTrailer" placeholder="URL Trailer (opsional)">
+        <textarea class="ai ai-ta" id="schSynopsis" placeholder="Sinopsis..."></textarea>
+        <input type="text" class="ai" id="schDay" placeholder="Hari update: Senin / Kamis / Segera">
+        <div class="csw">
+          <div class="cst" id="trigSchCat" onclick="toggleDD('ddSchCat')">Animation <span style="font-size:.6rem;color:var(--txt3)">▼</span></div>
+          <div class="cso" id="ddSchCat">
+            <div class="cso-opt" onclick="selOpt('schCat','Live TV','Live TV','trigSchCat','ddSchCat')">Live TV</div>
+            <div class="cso-opt" onclick="selOpt('schCat','Film','Film Indonesia','trigSchCat','ddSchCat')">Film Indonesia</div>
+            <div class="cso-opt" onclick="selOpt('schCat','Film Luar','Film Luar','trigSchCat','ddSchCat')">Film Luar</div>
+            <div class="cso-opt" onclick="selOpt('schCat','Anime','Anime','trigSchCat','ddSchCat')">Anime</div>
+            <div class="cso-opt" onclick="selOpt('schCat','Kartun','Animation','trigSchCat','ddSchCat')">Animation</div>
+          </div>
+          <input type="hidden" id="schCat" value="Kartun">
+        </div>
+        <div class="genre-grid" id="schGenreGrid"></div>
+        <button class="adm-act" onclick="saveSchedule()">Simpan Jadwal</button>
+      </div>
+
+      <div class="adm-sec" id="aSecManage">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;margin-bottom:14px">Kelola Konten</div>
+        <div class="manage-search">
+          <span class="ms">search</span>
+          <input type="search" class="ai" id="manageSearch" placeholder="Cari judul film..." autocomplete="off">
+        </div>
+        <div class="manage-count" id="manageCount"></div>
+        <button class="adm-act danger" style="margin-bottom:14px" onclick="triggerRemoveAll()">Kosongkan Semua Data</button>
+        <div id="manageList" style="max-height:360px;overflow-y:auto"></div>
+      </div>
+
+      <div class="adm-sec" id="aSecInbox">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;margin-bottom:14px">Pengumuman</div>
+        <input type="text" class="ai" id="annTitle" placeholder="Judul pengumuman..." style="margin-bottom:6px">
+        <textarea class="ai ai-ta" id="annBody" placeholder="Isi pengumuman..."></textarea>
+        <button class="adm-act" onclick="postAnnouncement()">Kirim Pengumuman</button>
+        <div class="ann-admin-list" id="annAdminList"></div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;margin:16px 0 14px">Inbox</div>
+        <div id="inboxList"></div>
+      </div>
+
+      <button class="adm-logout" onclick="logoutAdmin()">Tutup Admin</button>
+    </div>
+  </div>
+</div>
+
+<div class="alert-mask" id="alertMask">
+  <div class="alert-box">
+    <div class="alert-title" id="alertTitle"></div>
+    <div class="alert-msg" id="alertMsg"></div>
+    <div class="alert-btns" id="alertBtns"></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
